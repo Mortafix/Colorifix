@@ -31,6 +31,7 @@ class Style:
 	HIDDEN = '\033[8m'
 
 RESET = '\033[0m'
+ERASE = '\x1b[1A\x1b[2K'
 
 def _build_color(number): return f'\033[38;5;{number}m'
 
@@ -91,10 +92,4 @@ def _sample_all(mode):
 	if mode == 'color': return ''.join([paint(f'{i:>5}',i) for i in range(4)])+'\n'+''.join([paint('{:>5}{}'.format(i+3,'\n' if not i%6 and i != 252 else ''),i+3) for i in range(1,253)])
 	else: return ''.join([paint(f'{i:>4} ',background=i) for i in range(4)])+'\n'+''.join([paint('{:>4} {}'.format(i+3,'\n' if not i%6 and i != 252 else ''),background=i+3) for i in range(1,253)])
 
-if __name__ == '__main__':
-	print( paint('String to color',color=Color.RED) )
-	print( paint('String to color',background=Background.GREEN,style=(Style.BOLD,Style.UNDERLINE)) )
-	print( paint('String to color',color=34,background=27) )
-	print( random('YOLO',color=True,background=True) )
-	print( random('YOLO',color=True,style=True) )
-	print( random('YOLO',background=True) )
+def erase(lines=1): print(ERASE*lines)
