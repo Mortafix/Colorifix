@@ -92,4 +92,4 @@ def _sample_all(mode):
 	if mode == 'color': return ''.join([paint(f'{i:>5}',i) for i in range(4)])+'\n'+''.join([paint('{:>5}{}'.format(i+3,'\n' if not i%6 and i != 252 else ''),i+3) for i in range(1,253)])
 	else: return ''.join([paint(f'{i:>4} ',background=i) for i in range(4)])+'\n'+''.join([paint('{:>4} {}'.format(i+3,'\n' if not i%6 and i != 252 else ''),background=i+3) for i in range(1,253)])
 
-def erase(lines=1): print(ERASE*lines)
+def erase(lines=1): print(ERASE*lines,end='')
