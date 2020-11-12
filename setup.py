@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="colorifix",
-    version="1.0.7",
+    version="1.0.8",
     author="Moris Doratiotto",
     author_email="moris.doratiotto@gmail.com",
     description="A python module to color your terminal output life",
