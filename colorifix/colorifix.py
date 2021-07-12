@@ -1,95 +1,128 @@
-from random import choice,randint
+from re import match, sub
 
-class Color:
-	RED = '\033[31m'
-	GREEN = '\033[32m'
-	YELLOW = '\033[33m'
-	BLUE = '\033[34m'
-	MAGENTA = '\033[35m'
-	CYAN = '\033[36m'
-	WHITE = '\033[97m'
-	GRAY = '\033[37m'
-	BLACK = '\033[30m'
+# colors \033[XXm
+# background \033YYYm
+colors = {
+    "RED": (31, 101),
+    "GREEN": (32, 102),
+    "YELLOW": (33, 103),
+    "BLUE": (34, 104),
+    "MAGENTA": (35, 105),
+    "CYAN": (36, 106),
+    "WHITE": (97, 107),
+    "GRAY": (37, 100),
+    "BLACK": (30, 40),
+}
+# style \033[Zm
+styles = {"BOLD": 1, "UNDERLINE": 4, "DIM": 2, "BLINK": 5, "REVERSE": 7, "HIDDEN": 8}
 
-class Background:
-	RED = '\033[101m'
-	GREEN = '\033[102m'
-	YELLOW = '\033[103m'
-	BLUE = '\033[104m'
-	MAGENTA = '\033[105m'
-	CYAN = '\033[106m'
-	WHITE = '\033[107m'
-	GRAY = '\033[100m'
-	BLACK = '\033[40m'
 
-class Style:
-	BOLD = '\033[1m'
-	UNDERLINE = '\033[4m'
-	DIM = '\033[2m'
-	BLINK = '\033[5m'
-	REVERSE = '\033[7m'
-	HIDDEN = '\033[8m'
+RESET = "\033[0m"
+ERASE = "\x1b[1A\x1b[2K"
 
-RESET = '\033[0m'
-ERASE = '\x1b[1A\x1b[2K'
 
-def _build_color(number): return f'\033[38;5;{number}m'
+class ColoredFormat:
 
-def _build_background(number): return f'\033[48;5;{number}m'
+    color = None
+    bg = None
+    style = list()
 
-def _check_type(var,what,name,style=False):
-	if not var: return True
-	if not style and isinstance(var,int) and var not in range(257): raise ValueError(f'{name} number must be between 0 and 256.')
-	if isinstance(var,str) and var not in what.__dict__.values(): raise TypeError(f"{name} must be a {name} in {' or '.join(c for c in what.__dict__ if c == c.upper())}")
-	if not style and isinstance(var,(int,str)): return True
-	if style and isinstance(var,(str)): return True
-	if not style: raise TypeError(f'{name} must be an integer (between 0 and 256) or a {name} type')
-	raise TypeError(f'{name} must be a {name} type')
+    def set_color(self, color):
+        base_color = colors.get(color.upper())
+        self.color = base_color and f"\033[{base_color[0]}m" or f"\033[38;5;{color}m"
 
-def paint(string,color=None,background=None,style=None):
-	# type checking
-	_check_type(color,Color,'Color')
-	_check_type(background,Background,'Background')
-	if style: 
-		if type(style) is not tuple: style = (style,)
-		for s in style: _check_type(s,Style,'Style',True)
-	# build color from ints
-	if isinstance(color,int): color = _build_color(color)
-	if isinstance(background,int): background = _build_background(background)
-	# to string
-	color = color or ''
-	background = background or ''
-	style = ''.join(style) if style else ''
-	return f'{color}{style}{background}{string}{RESET}'
+    def set_background(self, bg):
+        base_bg = colors.get(bg.upper())
+        self.bg = base_bg and f"\033[{base_bg[1]}m" or f"\033[48;5;{bg}m"
 
-def random(string=None,color=None,background=None,style=None):
-	if color: color = choice([c for k,c in Color.__dict__.items() if k == k.upper()])
-	if background: background = choice([b for k,b in Background.__dict__.items() if k == k.upper()])
-	if style: style = tuple(set([choice([s for k,s in Style.__dict__.items() if k == k.upper()]) for _ in range(randint(1,4))]))
-	return paint(string,color,background,style)
+    def add_style(self, style):
+        self.style.append(f"\033[{styles.get(style.upper())}m")
 
-def sample(mode,complete=False):
-	red = paint(' RED ',Color.RED) if mode == 'color' else paint(' RED ',Color.BLACK,Background.RED)
-	green = paint(' GREEN ',Color.GREEN) if mode == 'color' else paint(' GREEN ',Color.BLACK,Background.GREEN)
-	yellow = paint(' YELLOW ',Color.YELLOW) if mode == 'color' else paint(' YELLOW ',Color.BLACK,Background.YELLOW)
-	blue = paint(' BLUE ',Color.BLUE) if mode == 'color' else paint(' BLUE ',Color.BLACK,Background.BLUE)
-	magenta = paint(' MAGENTA ',Color.MAGENTA) if mode == 'color' else paint(' MAGENTA ',Color.BLACK,Background.MAGENTA)
-	cyan = paint(' CYAN ',Color.CYAN) if mode == 'color' else paint(' CYAN ',Color.BLACK,Background.CYAN)
-	white = paint(' WHITE ',Color.WHITE) if mode == 'color' else paint(' WHITE ',Color.BLACK,Background.WHITE)
-	gray = paint(' GRAY ',Color.GRAY) if mode == 'color' else paint(' GRAY ',Color.BLACK,Background.GRAY)
-	black = paint(' BLACK ',Color.BLACK,Background.WHITE) if mode == 'color' else paint(' BLACK ',Color.WHITE,Background.BLACK)
-	bold = paint(' BOLD ',style=Style.BOLD)
-	underline = paint(' UNDERLINE ',style=Style.UNDERLINE)
-	dim = paint(' DIM ',style=Style.DIM)
-	blink = paint(' BLINK ',style=Style.BLINK)
-	reverse = paint(' REVERSE ',style=Style.REVERSE)
-	hidden = paint(' HIDDEN ',background=Background.WHITE,style=Style.HIDDEN)
-	if mode in ('color','background'): print(f'{red} {green} {yellow} {blue} {magenta} {cyan} {white} {gray} {black}\n\n{_sample_all(mode) if complete else ""}')
-	elif mode == 'style': print(f'{bold} {underline} {dim} {blink} {reverse} {hidden}')
-	else: raise ValueError('mode must be color, background or style')
+    def rm_color(self):
+        self.color = None
 
-def _sample_all(mode):
-	if mode == 'color': return ''.join([paint(f'{i:>5}',i) for i in range(4)])+'\n'+''.join([paint('{:>5}{}'.format(i+3,'\n' if not i%6 and i != 252 else ''),i+3) for i in range(1,253)])
-	else: return ''.join([paint(f'{i:>4} ',background=i) for i in range(4)])+'\n'+''.join([paint('{:>4} {}'.format(i+3,'\n' if not i%6 and i != 252 else ''),background=i+3) for i in range(1,253)])
+    def rm_background(self):
+        self.bg = None
 
-def erase(lines=1): print(ERASE*lines,end='')
+    def rm_style(self):
+        self.style.clear()
+
+    def build_formatting(self, formatting):
+        to_add = {"#": self.set_color, "@": self.add_style, "!": self.set_background}
+        to_remove = {"#": self.rm_color, "@": self.rm_style, "!": self.rm_background}
+        if match(r"/", formatting):
+            if len(formatting) == 1:
+                for _, func in to_remove.items():
+                    func()
+            for f in formatting[1:]:
+                to_remove.get(f)()
+            return
+        fmt, arg = match(r"([#@!])(.+)", formatting).groups()
+        to_add.get(fmt)(arg)
+
+    def build(self, string):
+        for fmt in string[1:-1].split():
+            self.build_formatting(fmt)
+        return f"{RESET}{self.color or ''}{self.bg or ''}{''.join(self.style)}"
+
+
+def check_format(formatting):
+    """Validity check"""
+    if match(r"\[.+\]", formatting):
+        formatting = formatting[1:-1]
+    if " " in formatting:
+        return all(check_format(single) for single in formatting.split())
+    if (m := match(r"[!#](.+)", formatting)) :
+        color = m.group(1)
+        return color.upper() in colors or (color.isdigit() and 0 <= int(color) <= 256)
+    if (m := match(r"@(.+)", formatting)) :
+        return m.group(1).upper() in styles
+    return match("/[#@!]*", formatting)
+
+
+def paint(string, printing=True):
+    """Return pretty formatted string"""
+    fmt = ColoredFormat()
+    formatting = (
+        lambda x: check_format(x.group(1)) and fmt.build(x.group(1)) or x.group(1)
+    )
+    colored_return = sub(r"(\[.+?\])", formatting, string + "[/]")
+    if not printing:
+        return colored_return
+    print(colored_return)
+
+
+def sample(complete=False):
+    paint(
+        "# ---- BASE COLORS ---- #\n"
+        "Color:      [#red] RED [#green] GREEN [#yellow] YELLOW [#blue] BLUE [#magenta]"
+        " MAGENTA [#cyan] CYAN [#white] WHITE [#gray] GRAY [#black] BLACK\n[/]"
+        "Background: [#white !red] RED [!green] GREEN [!yellow] YELLOW [!blue] BLUE "
+        "[!magenta] MAGENTA [!cyan] CYAN [#black !white] WHITE [#white !gray] GRAY "
+        "[!black] BLACK [/]\n"
+        "Styles:     [@bold] BOLD [/@ @underline] UNDERLINE [/@ @dim] DIM [/@ @blink]"
+        " BLINK [/@ @reverse] REVERSE [!white /@  @hidden] HIDDEN [/]"
+    )
+    if complete:
+        _sample_all()
+
+
+def _sample_all():
+    first_row = "".join(f"[#{i}]{i:>5}" for i in range(4))
+    other_rows = "".join(
+        f"[#{i+3}]{i+3:>5}" + ("\n" if not i % 6 and i != 252 else "")
+        for i in range(1, 253)
+    )
+    print("\n\n# ---- INT COLORS ---- #")
+    paint(f"{first_row}\n{other_rows}")
+    first_row = "".join(f"[!{i}]{i:>5}" for i in range(4))
+    other_rows = "".join(
+        f"[!{i+3}]{i+3:>5}" + ("[/]\n" if not i % 6 and i != 252 else "")
+        for i in range(1, 253)
+    )
+    print("\n\n# ---- INT BACKGROUNDS ---- #")
+    paint(f"{first_row}[/]\n{other_rows}")
+
+
+def erase(lines=1):
+    print(ERASE * lines, end="")

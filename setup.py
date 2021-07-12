@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="colorifix",
-    version="1.0.8",
+    version="2.0.0",
     author="Moris Doratiotto",
     author_email="moris.doratiotto@gmail.com",
     description="A python module to color your terminal output life",
@@ -20,9 +20,9 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
     ],
-    python_requires='>=3.6',
-    keywords=['color','bash','terminal','crayons'],
+    python_requires=">=3.6",
+    keywords=["color", "bash", "terminal", "crayons"],
 )
