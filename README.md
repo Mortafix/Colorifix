@@ -32,10 +32,11 @@ paint("[#yellow @underline]This is a yellow underline string[/@], now only yello
 ```
 ![Remove example](images/remove.png)
 ### Print or not print
-You can choose to **print** the string or just save in a variable [default is a `print`].
+You can choose to **print** the string or just **save** it in a variable.
 ```python
-paint("[!black @dim]Hello Color![/]") # it prints
-colored_str = paint("[!42]Again![/]", False)
+colored_str = paint("[!black @dim]Hello Color![/]") # save it
+ppaint("[!42]Again![/]") # print it directly
+paint("[!42]Again![/]", False) # print it from main function, same as above
 ```
 
 # Colors

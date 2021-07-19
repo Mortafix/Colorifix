@@ -80,7 +80,7 @@ def check_format(formatting):
     return match("/[#@!]*", formatting)
 
 
-def paint(string, printing=True):
+def paint(string, printing=False):
     """Return pretty formatted string"""
     fmt = ColoredFormat()
     formatting = (
@@ -90,6 +90,11 @@ def paint(string, printing=True):
     if not printing:
         return colored_return
     print(colored_return)
+
+
+def ppaint(string):
+    """Print the pretty formatted string"""
+    return paint(string, printing=True)
 
 
 def sample(complete=False):
