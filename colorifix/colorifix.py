@@ -86,7 +86,7 @@ def paint(string, printing=False):
     formatting = (
         lambda x: check_format(x.group(1)) and fmt.build(x.group(1)) or x.group(1)
     )
-    colored_return = sub(r"(\[.+?\])", formatting, string + "[/]")
+    colored_return = sub(r"(\[[^\[]+?\])", formatting, string + "[/]")
     if not printing:
         return colored_return
     print(colored_return)
