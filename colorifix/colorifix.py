@@ -106,7 +106,8 @@ def sample(complete=False):
         "[!magenta] MAGENTA [!cyan] CYAN [#black !white] WHITE [#white !gray] GRAY "
         "[!black] BLACK [/]\n"
         "Styles:     [@bold] BOLD [/@ @underline] UNDERLINE [/@ @dim] DIM [/@ @blink]"
-        " BLINK [/@ @reverse] REVERSE [!white /@  @hidden] HIDDEN [/]"
+        " BLINK [/@ @reverse] REVERSE [!white /@  @hidden] HIDDEN [/]",
+        True,
     )
     if complete:
         _sample_all()
@@ -119,14 +120,14 @@ def _sample_all():
         for i in range(1, 253)
     )
     print("\n\n# ---- INT COLORS ---- #")
-    paint(f"{first_row}\n{other_rows}")
+    paint(f"{first_row}\n{other_rows}", True)
     first_row = "".join(f"[!{i}]{i:>5}" for i in range(4))
     other_rows = "".join(
         f"[!{i+3}]{i+3:>5}" + ("[/]\n" if not i % 6 and i != 252 else "")
         for i in range(1, 253)
     )
     print("\n\n# ---- INT BACKGROUNDS ---- #")
-    paint(f"{first_row}[/]\n{other_rows}")
+    paint(f"{first_row}[/]\n{other_rows}", True)
 
 
 def erase(lines=1):
